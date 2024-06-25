@@ -35,10 +35,14 @@ public class ContenidoTexto implements Contenido<String> {
 
     @Override
     public void validarContenido(Cuenta cuenta) {
-        int publicacionMaxCharacters = cuenta.getPublicacionMaxCharacters();
+        int maximosCaracteresPermitidos = cuenta.getPublicacionMaxCharacters();
 
-        if (texto.length() > publicacionMaxCharacters)
-            throw new InvalidPublicacionLengthException("La publicación excede los " + publicacionMaxCharacters + " caracteres");
+        int longitudTextoParaPublicar = texto.length();
+        if (longitudTextoParaPublicar > maximosCaracteresPermitidos)
+            throw new InvalidPublicacionLengthException(String.format("La cuenta %s intentó publicar un contenido " +
+                    "inválido. Esta cuenta sólo puede publicar un texto de %d caracteres como máximo y se intentó " +
+                    "publicar un texto de %d caracteres", cuenta.getUsername(), maximosCaracteresPermitidos,
+                    longitudTextoParaPublicar));
     }
 
     @Override

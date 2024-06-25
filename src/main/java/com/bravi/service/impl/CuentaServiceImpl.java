@@ -1,11 +1,10 @@
 package com.bravi.service.impl;
 
+import com.bravi.constant.PublicacionLengthEnum;
 import com.bravi.constant.PublicacionTypeEnum;
 import com.bravi.entity.Contenido;
 import com.bravi.entity.Cuenta;
 import com.bravi.entity.Publicacion;
-import com.bravi.exception.LikeNotAvailableException;
-import com.bravi.exception.PublicacionNotFoundException;
 import com.bravi.exception.UserAuthenticationException;
 import com.bravi.repository.CuentaRepository;
 import com.bravi.repository.PublicacionRepository;
@@ -55,6 +54,7 @@ public class CuentaServiceImpl implements CuentaService {
         Cuenta seguidor = findCuenta(followerUsername);
 
         cuenta.addSeguidor(seguidor);
+        System.out.printf("Se añadió como seguidor de la cuenta %s a %s\n", accountUsername, followerUsername);
     }
 
     @Override
@@ -72,6 +72,7 @@ public class CuentaServiceImpl implements CuentaService {
         publicacionRepository.guardarPublicacion(publicacion);
 
         userLogged.publicar(publicacion);
+        mostrarPublicacion(publicacion);
         for (String etiqueta : contenido.getEtiquetas()) {
             Cuenta cuenta = findCuenta(etiqueta);
             cuenta.publicar(publicacion);
@@ -119,8 +120,8 @@ public class CuentaServiceImpl implements CuentaService {
             }
         }
 
-        System.out.println("El alcance de la cuenta " + LoggedUser.getUserLogged().getUsername()
-                + " es de " + alcance + " personas directas e indirectas");
+        String username = LoggedUser.getUserLogged().getUsername();
+        System.out.printf("El alcance de la cuenta %s es de %d personas directas e indirectas\n", username, alcance);
     }
 
     @Override
@@ -167,5 +168,36 @@ public class CuentaServiceImpl implements CuentaService {
                 .collect(Collectors.groupingBy(Publicacion::getId,
                         Collectors.collectingAndThen(Collectors.mapping(Function.identity(),
                                 Collectors.toList()), a -> a.get(0))));
+    }
+
+    private void mostrarPublicacion(Publicacion<?> publicacion) {
+        Cuenta userLogged = LoggedUser.getUserLogged();
+
+        boolean reposteable = publicacion.isReposteable();
+        boolean likeable = publicacion.isLikeable();
+
+        String contenidoPublicado = new String(publicacion.getContenido().getContenidoPublicado());
+        String nombre = userLogged.getNombre();
+        String descripcionPublicacionPorCuenta = PublicacionLengthEnum.getDescripcionPublicacionPorCuenta(userLogged).toLowerCase();
+        if (reposteable && likeable) {
+            System.out.printf("%s publica un texto %s likeable y reposteable con contenido: \"%s\"\n", nombre,
+                    descripcionPublicacionPorCuenta, contenidoPublicado);
+            return;
+        }
+
+        if (reposteable) {
+            System.out.printf("%s publica un texto %s reposteable con contenido: \"%s\"\n", nombre,
+                    descripcionPublicacionPorCuenta, contenidoPublicado);
+            return;
+        }
+
+        if (likeable) {
+            System.out.printf("%s publica un texto %s likeable con contenido: \"%s\"\n", nombre,
+                    descripcionPublicacionPorCuenta, contenidoPublicado);
+            return;
+        }
+
+        System.out.printf("%s publica un texto %s con contenido: \"%s\"\n", nombre, descripcionPublicacionPorCuenta,
+                contenidoPublicado);
     }
 }
