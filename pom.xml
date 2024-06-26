@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.red.social</groupId>
-    <artifactId>TP Red Social</artifactId>
+    <artifactId>TPRedSocial</artifactId>
     <version>1.0.0</version>
 
     <properties>
