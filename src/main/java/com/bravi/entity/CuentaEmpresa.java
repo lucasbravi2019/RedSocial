@@ -8,9 +8,29 @@ import java.time.LocalDate;
 
 public class CuentaEmpresa extends Cuenta {
 
+    private String direccion;
+    private String telefono;
+
     public CuentaEmpresa() {
         super(new SeguidorCuentaEmpresa());
     }
+
+    public String getDireccion() {
+        return direccion;
+    }
+
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
+    }
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
 
     @Override
     public void publicar(Publicacion<?> publicacion) {
@@ -18,6 +38,11 @@ public class CuentaEmpresa extends Cuenta {
 
         if (publicacion.getAutor().equals(this))
             seguidores.publicarPublicacion(publicacion);
+    }
+
+    @Override
+    public boolean canFollow() {
+        return false;
     }
 
     @Override
@@ -62,10 +87,26 @@ public class CuentaEmpresa extends Cuenta {
             return this;
         }
 
+        public CuentaEmpresaBuilder direccion(String direccion) {
+            this.cuentaEmpresa.setDireccion(direccion);
+            return this;
+        }
+
+        public CuentaEmpresaBuilder telefono(String telefono) {
+            this.cuentaEmpresa.setTelefono(telefono);
+            return this;
+        }
+
         public CuentaEmpresa build() {
             return this.cuentaEmpresa;
         }
 
     }
 
+    @Override
+    public void mostrarCuenta() {
+        super.mostrarCuenta();
+        System.out.println("Dirección: " + direccion);
+        System.out.println("Teléfono: " + telefono);
+    }
 }

@@ -1,6 +1,7 @@
 package com.bravi.service.impl;
 
 import com.bravi.constant.CuentaTypeEnum;
+import com.bravi.dto.CreacionCuentaDTO;
 import com.bravi.entity.Cuenta;
 import com.bravi.entity.CuentaEmpresa;
 import com.bravi.entity.CuentaNormal;
@@ -21,8 +22,14 @@ class CuentaFactoryImplTest {
 
     @Test
     void crearCuentaPopular() {
-        Cuenta cuenta = cuentaFactory.crearCuenta("User 1", "user1@mail.com", LocalDate.of(2023, 1, 1),
-                CuentaTypeEnum.POPULAR);
+        CreacionCuentaDTO dto = CreacionCuentaDTO.builder()
+                .nombre("User 1")
+                .email("user1@mail.com")
+                .fechaNacimiento(LocalDate.of(2023, 1, 1))
+                .tipoCuenta('P')
+                .build();
+
+        Cuenta cuenta = cuentaFactory.crearCuenta(dto, CuentaTypeEnum.POPULAR);
 
         assertEquals("User 1", cuenta.getNombre());
         assertEquals("user1@mail.com", cuenta.getEmail());
@@ -34,21 +41,37 @@ class CuentaFactoryImplTest {
 
     @Test
     void crearCuentaEmpresa() {
-        Cuenta cuenta = cuentaFactory.crearCuenta("User 1", "user1@mail.com", LocalDate.of(2023, 1, 1),
-                CuentaTypeEnum.EMPRESA);
+        CreacionCuentaDTO dto = CreacionCuentaDTO.builder()
+                .nombre("User 1")
+                .email("user1@mail.com")
+                .fechaNacimiento(LocalDate.of(2023, 1, 1))
+                .tipoCuenta('E')
+                .direccion("Dirección 1")
+                .telefono("+54 261 999 9999")
+                .build();
+
+        CuentaEmpresa cuenta = (CuentaEmpresa) cuentaFactory.crearCuenta(dto, CuentaTypeEnum.EMPRESA);
 
         assertEquals("User 1", cuenta.getNombre());
         assertEquals("user1@mail.com", cuenta.getEmail());
         assertEquals("user1", cuenta.getUsername());
         assertEquals(LocalDate.of(2023, 1, 1), cuenta.getFechaNacimiento());
+        assertEquals("Dirección 1", cuenta.getDireccion());
+        assertEquals("+54 261 999 9999", cuenta.getTelefono());
         assertEquals(CuentaTypeEnum.EMPRESA, cuenta.getCuentaType());
         assertEquals(CuentaEmpresa.class, cuenta.getClass());
     }
 
     @Test
     void crearCuentaNormal() {
-        Cuenta cuenta = cuentaFactory.crearCuenta("User 1", "user1@mail.com", LocalDate.of(2023, 1, 1),
-                CuentaTypeEnum.NORMAL);
+        CreacionCuentaDTO dto = CreacionCuentaDTO.builder()
+                .nombre("User 1")
+                .email("user1@mail.com")
+                .fechaNacimiento(LocalDate.of(2023, 1, 1))
+                .tipoCuenta('N')
+                .build();
+
+        Cuenta cuenta = cuentaFactory.crearCuenta(dto, CuentaTypeEnum.NORMAL);
 
         assertEquals("User 1", cuenta.getNombre());
         assertEquals("user1@mail.com", cuenta.getEmail());
@@ -60,8 +83,14 @@ class CuentaFactoryImplTest {
 
     @Test
     void crearCuentaNormalMailInvalido() {
-        Cuenta cuenta = cuentaFactory.crearCuenta("User 1", "user1", LocalDate.of(2023, 1, 1),
-                CuentaTypeEnum.NORMAL);
+        CreacionCuentaDTO dto = CreacionCuentaDTO.builder()
+                .nombre("User 1")
+                .email("user1")
+                .fechaNacimiento(LocalDate.of(2023, 1, 1))
+                .tipoCuenta('N')
+                .build();
+
+        Cuenta cuenta = cuentaFactory.crearCuenta(dto, CuentaTypeEnum.NORMAL);
 
         assertEquals("User 1", cuenta.getNombre());
         assertEquals("user1", cuenta.getEmail());

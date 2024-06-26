@@ -1,9 +1,11 @@
 package com.bravi.service;
 
 import com.bravi.constant.PublicacionTypeEnum;
+import com.bravi.dto.CreacionCuentaDTO;
 import com.bravi.entity.Publicacion;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Map;
 
 public interface SocialMediaFacade {
@@ -34,15 +36,17 @@ public interface SocialMediaFacade {
 
     void seguirUsuario(String username);
 
-    void listarSeguidores();
+    boolean listarSeguidores();
 
     void dejarDeSeguir(String username);
 
-    void crearNuevoUsuario(String nombre, String email, LocalDate fechaNacimiento, Character tipoCuenta);
+    void crearNuevoUsuario(CreacionCuentaDTO creacionCuentaDTO);
 
     void borrarUsuario(String username);
 
     boolean verPublicacionesParaBorrar();
 
     void borrarPublicacion(Integer publicacionId);
+
+    void mostrarPublicaciones(Collection<Publicacion<?>> publicaciones);
 }

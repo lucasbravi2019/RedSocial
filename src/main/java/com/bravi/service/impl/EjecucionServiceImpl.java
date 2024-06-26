@@ -2,6 +2,7 @@ package com.bravi.service.impl;
 
 import com.bravi.constant.CuentaTypeEnum;
 import com.bravi.constant.PublicacionTypeEnum;
+import com.bravi.dto.CreacionCuentaDTO;
 import com.bravi.entity.Cuenta;
 import com.bravi.entity.Publicacion;
 import com.bravi.exception.AccountNotFoundException;
@@ -156,8 +157,11 @@ public class EjecucionServiceImpl implements EjecucionService {
     }
 
     private void ejecutarDejarSeguirUsuario() {
+        boolean haySeguidores = socialMediaFacade.listarSeguidores();
+        if (!haySeguidores)
+            return;
+
         menuService.mostrarMenuDejarDeSeguirUsuario();
-        socialMediaFacade.listarSeguidores();
         String username = userInputService.obtenerDato();
         socialMediaFacade.dejarDeSeguir(username);
     }
@@ -193,7 +197,7 @@ public class EjecucionServiceImpl implements EjecucionService {
         Map<Integer, Publicacion<?>> publicacionesPorId = socialMediaFacade
                 .obtenerPublicacionesSegunTipo(publicacionType);
 
-        menuService.mostrarPublicaciones(publicacionesPorId.values());
+        socialMediaFacade.mostrarPublicaciones(publicacionesPorId.values());
         Integer publicacionId = userInputService.obtenerEntero();
 
         Publicacion<?> publicacion = publicacionesPorId.get(publicacionId);
@@ -263,7 +267,23 @@ public class EjecucionServiceImpl implements EjecucionService {
         String email = pedirEmail();
         LocalDate fechaNacimiento = pedirFechaNacimiento();
         Character tipoCuenta = pedirTipoCuenta();
-        socialMediaFacade.crearNuevoUsuario(nombre, email, fechaNacimiento, tipoCuenta);
+
+        CreacionCuentaDTO creacionCuentaDTO = CreacionCuentaDTO.builder()
+                .nombre(nombre)
+                .email(email)
+                .fechaNacimiento(fechaNacimiento)
+                .tipoCuenta(tipoCuenta)
+                .build();
+
+        if (CuentaTypeEnum.EMPRESA.equals(CuentaTypeEnum.getTipoCuentaPorCaracter(tipoCuenta))) {
+            menuService.pedirDireccion();
+            String direccion = userInputService.obtenerDato();
+            menuService.pedirTelefono();
+            String telefono = userInputService.obtenerDato();
+            creacionCuentaDTO.setDireccion(direccion);
+            creacionCuentaDTO.setTelefono(telefono);
+        }
+        socialMediaFacade.crearNuevoUsuario(creacionCuentaDTO);
     }
 
     private String pedirEmail() {

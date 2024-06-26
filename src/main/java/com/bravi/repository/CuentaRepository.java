@@ -15,4 +15,5 @@ public interface CuentaRepository {
 
     void delete(Cuenta cuenta);
 
+    boolean existsByEmail(String email);
 }

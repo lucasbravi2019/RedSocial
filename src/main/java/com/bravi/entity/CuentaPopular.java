@@ -22,6 +22,11 @@ public class CuentaPopular extends Cuenta {
     }
 
     @Override
+    public boolean canFollow() {
+        return true;
+    }
+
+    @Override
     public CuentaTypeEnum getCuentaType() {
         return CuentaTypeEnum.POPULAR;
     }

@@ -17,6 +17,7 @@ public abstract class Cuenta extends Usuario {
         this.status = CuentaStatusEnum.ABIERTA;
         this.feed = new Feed();
         this.seguidores = seguidores;
+        this.seguidores.setCuenta(this);
     }
 
     public abstract void publicar(Publicacion<?> publicacion);
@@ -89,5 +90,17 @@ public abstract class Cuenta extends Usuario {
         if (CuentaStatusEnum.SUSPENDIDA.equals(status)) {
             setStatus(CuentaStatusEnum.ABIERTA);
         }
+    }
+
+    public abstract boolean canFollow();
+
+    public void mostrarCuenta() {
+        System.out.println("Id: " + this.getId());
+        System.out.println("Email: " + this.getEmail());
+        System.out.println("Nombre: " + this.getNombre());
+        System.out.println("Username: " + this.getUsername());
+        System.out.println("Tipo de cuenta: " + this.getCuentaType().getTipoCuenta());
+        System.out.println("Status: " + this.getStatus());
+        System.out.println("Fecha de nacimiento: " + this.getFechaNacimiento());
     }
 }

@@ -57,23 +57,6 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
-    public void mostrarPublicaciones(Collection<Publicacion<?>> publicaciones) {
-        publicaciones.forEach(publicacion -> {
-            StringBuilder sb = new StringBuilder("Id: ")
-                    .append(publicacion.getId());
-
-            byte[] contenidoPublicado = publicacion.getContenido().getContenidoPublicado();
-            if (String.class.equals(publicacion.getContenido().getType())) {
-                String contenido = new String(contenidoPublicado);
-
-                sb.append(", ").append(contenido);
-            }
-
-            System.out.println(sb);
-        });
-    }
-
-    @Override
     public void mostrarMenuSeguirUsuario() {
         System.out.println("Por favor ingrese el nombre de usuario de la cuenta que desea seguir");
     }
@@ -106,6 +89,16 @@ public class MenuServiceImpl implements MenuService {
     @Override
     public void pedirTipoCuenta() {
         System.out.println("Por favor ingrese la letra del tipo de cuenta desea crear [E] = Empresa, [P] = Popular, [N] = Normal");
+    }
+
+    @Override
+    public void pedirTelefono() {
+        System.out.println("Por favor ingrese su teléfono");
+    }
+
+    @Override
+    public void pedirDireccion() {
+        System.out.println("Por favor ingrese su dirección");
     }
 
     @Override

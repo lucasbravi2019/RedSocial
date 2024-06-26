@@ -1,12 +1,14 @@
 package com.bravi.service.impl;
 
 import com.bravi.constant.PublicacionTypeEnum;
+import com.bravi.dto.CreacionCuentaDTO;
 import com.bravi.entity.*;
+import com.bravi.exception.AccountAlreadyExistsException;
 import com.bravi.service.CuentaService;
 import com.bravi.service.SocialMediaFacade;
 import com.bravi.user.LoggedUser;
 
-import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -119,7 +121,7 @@ public class SocialMediaFacadeImpl implements SocialMediaFacade {
 
     @Override
     public void cambiarEstadoCuenta() {
-       cuentaService.alternarEstado();
+        cuentaService.alternarEstado();
     }
 
     @Override
@@ -153,8 +155,12 @@ public class SocialMediaFacadeImpl implements SocialMediaFacade {
     }
 
     @Override
-    public void crearNuevoUsuario(String nombre, String email, LocalDate fechaNacimiento, Character tipoCuenta) {
-        cuentaService.crearCuenta(nombre, email, fechaNacimiento, tipoCuenta);
+    public void crearNuevoUsuario(CreacionCuentaDTO creacionCuentaDTO) {
+        try {
+            cuentaService.crearCuenta(creacionCuentaDTO);
+        } catch (AccountAlreadyExistsException ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 
     @Override
@@ -183,17 +189,42 @@ public class SocialMediaFacadeImpl implements SocialMediaFacade {
     }
 
     @Override
-    public void listarSeguidores() {
+    public boolean listarSeguidores() {
         Cuenta userLogged = LoggedUser.getUserLogged();
         List<Cuenta> seguidores = userLogged.getSeguidores().getSeguidores();
+
+        if (seguidores == null || seguidores.isEmpty()) {
+            System.out.println("No hay seguidores");
+            return false;
+        }
+
         for (Cuenta seguidor : seguidores) {
             System.out.println(seguidor.getUsername());
         }
+
+        return true;
     }
 
     @Override
     public void borrarPublicacion(Integer publicacionId) {
         Cuenta userLogged = LoggedUser.getUserLogged();
         userLogged.getFeed().getPublicaciones().removeIf(publicacion -> publicacion.getId() == publicacionId);
+    }
+
+    @Override
+    public void mostrarPublicaciones(Collection<Publicacion<?>> publicaciones) {
+        publicaciones.forEach(publicacion -> {
+            StringBuilder sb = new StringBuilder("Id: ")
+                    .append(publicacion.getId());
+
+            byte[] contenidoPublicado = publicacion.getContenido().getContenidoPublicado();
+            if (String.class.equals(publicacion.getContenido().getType())) {
+                String contenido = new String(contenidoPublicado);
+
+                sb.append(", ").append(contenido);
+            }
+
+            System.out.println(sb);
+        });
     }
 }

@@ -15,5 +15,4 @@ public class SeguidorCuentaPopular extends Seguidores {
 
         super.follow(publicaciones, cuenta);
     }
-
 }

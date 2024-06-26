@@ -19,8 +19,6 @@ public interface MenuService {
 
     void mostrarMenuPublicacion();
 
-    void mostrarPublicaciones(Collection<Publicacion<?>> publicaciones);
-
     void mostrarMenuSeguirUsuario();
 
     void mostrarMenuDejarDeSeguirUsuario();
@@ -34,6 +32,10 @@ public interface MenuService {
     void mostrarMenuBorrarCuenta();
 
     void pedirTipoCuenta();
+
+    void pedirTelefono();
+
+    void pedirDireccion();
 
     void mostrarMenuBorrarPublicacion();
 }

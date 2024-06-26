@@ -1,6 +1,7 @@
 package com.bravi.service.impl;
 
 import com.bravi.constant.CuentaTypeEnum;
+import com.bravi.dto.CreacionCuentaDTO;
 import com.bravi.entity.Cuenta;
 import com.bravi.entity.CuentaEmpresa;
 import com.bravi.entity.CuentaNormal;
@@ -33,41 +34,62 @@ class CuentaServiceImplTest {
 
     @Test
     void crearCuentaPopular() {
+        CreacionCuentaDTO dto = CreacionCuentaDTO.builder()
+                .nombre("User 1")
+                .email("user1@mail.com")
+                .fechaNacimiento(LocalDate.of(2023, 1, 1))
+                .tipoCuenta('P')
+                .build();
         Cuenta cuenta = new CuentaPopular();
-        when(cuentaFactory.crearCuenta("User 1", "user1@mail.com", LocalDate.of(2023, 1, 1),
-                CuentaTypeEnum.POPULAR)).thenReturn(cuenta);
+        when(cuentaFactory.crearCuenta(dto, CuentaTypeEnum.POPULAR)).thenReturn(cuenta);
 
-        cuentaService.crearCuenta("User 1", "user1@mail.com", LocalDate.of(2023, 1, 1), 'P');
+        cuentaService.crearCuenta(dto);
 
         verify(cuentaRepository, times(1)).save(cuenta);
     }
 
     @Test
     void crearCuentaEmpresa() {
+        CreacionCuentaDTO dto = CreacionCuentaDTO.builder()
+                .nombre("User 1")
+                .email("user1@mail.com")
+                .fechaNacimiento(LocalDate.of(2023, 1, 1))
+                .tipoCuenta('E')
+                .build();
         Cuenta cuenta = new CuentaEmpresa();
-        when(cuentaFactory.crearCuenta("User 1", "user1@mail.com", LocalDate.of(2023, 1, 1),
-                CuentaTypeEnum.EMPRESA)).thenReturn(cuenta);
+        when(cuentaFactory.crearCuenta(dto, CuentaTypeEnum.EMPRESA)).thenReturn(cuenta);
 
-        cuentaService.crearCuenta("User 1", "user1@mail.com", LocalDate.of(2023, 1, 1), 'E');
+        cuentaService.crearCuenta(dto);
 
         verify(cuentaRepository, times(1)).save(cuenta);
     }
 
     @Test
     void crearCuentaNormal() {
+        CreacionCuentaDTO dto = CreacionCuentaDTO.builder()
+                .nombre("User 1")
+                .email("user1@mail.com")
+                .fechaNacimiento(LocalDate.of(2023, 1, 1))
+                .tipoCuenta('N')
+                .build();
         Cuenta cuenta = new CuentaNormal();
-        when(cuentaFactory.crearCuenta("User 1", "user1@mail.com", LocalDate.of(2023, 1, 1),
-                CuentaTypeEnum.NORMAL)).thenReturn(cuenta);
+        when(cuentaFactory.crearCuenta(dto, CuentaTypeEnum.NORMAL)).thenReturn(cuenta);
 
-        cuentaService.crearCuenta("User 1", "user1@mail.com", LocalDate.of(2023, 1, 1), 'N');
+        cuentaService.crearCuenta(dto);
 
         verify(cuentaRepository, times(1)).save(cuenta);
     }
 
     @Test
     void crearCuentaInvalida() {
-        assertDoesNotThrow(() ->
-                cuentaService.crearCuenta("User 1", "user1@mail.com", LocalDate.of(2023, 1, 1), 'S'));
+        CreacionCuentaDTO dto = CreacionCuentaDTO.builder()
+                .nombre("User 1")
+                .email("user1@mail.com")
+                .fechaNacimiento(LocalDate.of(2023, 1, 1))
+                .tipoCuenta('S')
+                .build();
+
+        assertDoesNotThrow(() -> cuentaService.crearCuenta(dto));
 
         verify(cuentaRepository, never()).save(any());
     }

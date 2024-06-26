@@ -3,9 +3,11 @@ package com.bravi.service.impl;
 import com.bravi.constant.CuentaTypeEnum;
 import com.bravi.constant.PublicacionLengthEnum;
 import com.bravi.constant.PublicacionTypeEnum;
+import com.bravi.dto.CreacionCuentaDTO;
 import com.bravi.entity.Contenido;
 import com.bravi.entity.Cuenta;
 import com.bravi.entity.Publicacion;
+import com.bravi.exception.AccountAlreadyExistsException;
 import com.bravi.exception.AccountNotFoundException;
 import com.bravi.exception.SeguidorInvalidException;
 import com.bravi.exception.UserAuthenticationException;
@@ -131,13 +133,7 @@ public class CuentaServiceImpl implements CuentaService {
     public void mostrarInformacionCuenta() {
         Cuenta userLogged = LoggedUser.getUserLogged();
 
-        System.out.println("Id: " + userLogged.getId());
-        System.out.println("Email: " + userLogged.getEmail());
-        System.out.println("Nombre: " + userLogged.getNombre());
-        System.out.println("Username: " + userLogged.getUsername());
-        System.out.println("Tipo de cuenta: " + userLogged.getCuentaType().getTipoCuenta());
-        System.out.println("Status: " + userLogged.getStatus());
-        System.out.println("Fecha de nacimiento: " + userLogged.getFechaNacimiento());
+        userLogged.mostrarCuenta();
     }
 
     @Override
@@ -227,16 +223,21 @@ public class CuentaServiceImpl implements CuentaService {
     }
 
     @Override
-    public void crearCuenta(String nombre, String email, LocalDate fechaNacimiento, Character tipoCuenta) {
+    public void crearCuenta(CreacionCuentaDTO creacionCuentaDTO) {
+        boolean existeCuenta = cuentaRepository.existsByEmail(creacionCuentaDTO.getEmail());
+        if (existeCuenta) {
+            throw new AccountAlreadyExistsException(String.format("La cuenta con email %s ya existe", creacionCuentaDTO.getEmail()));
+        }
+
         CuentaTypeEnum tipoCuentaACrear;
         try {
-            tipoCuentaACrear = CuentaTypeEnum.getTipoCuentaPorCaracter(tipoCuenta);
+            tipoCuentaACrear = CuentaTypeEnum.getTipoCuentaPorCaracter(creacionCuentaDTO.getTipoCuenta());
         } catch (IllegalStateException ex) {
             System.out.println(ex.getMessage());
             return;
         }
 
-        Cuenta cuenta = cuentaFactory.crearCuenta(nombre, email, fechaNacimiento, tipoCuentaACrear);
+        Cuenta cuenta = cuentaFactory.crearCuenta(creacionCuentaDTO, tipoCuentaACrear);
         cuentaRepository.save(cuenta);
     }
 

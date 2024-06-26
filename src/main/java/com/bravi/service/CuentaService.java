@@ -1,6 +1,7 @@
 package com.bravi.service;
 
 import com.bravi.constant.PublicacionTypeEnum;
+import com.bravi.dto.CreacionCuentaDTO;
 import com.bravi.entity.Contenido;
 import com.bravi.entity.Cuenta;
 import com.bravi.entity.Publicacion;
@@ -45,7 +46,7 @@ public interface CuentaService {
 
     void dejarDeSeguir(String username);
 
-    void crearCuenta(String nombre, String email, LocalDate fechaNacimiento, Character tipoCuenta);
+    void crearCuenta(CreacionCuentaDTO creacionCuentaDTO);
 
     void borrarCuenta(String username);
 }

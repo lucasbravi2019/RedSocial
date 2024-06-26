@@ -18,6 +18,11 @@ public class CuentaRepositoryImpl implements CuentaRepository {
     }
 
     @Override
+    public boolean existsByEmail(String email) {
+        return cuentas.stream().anyMatch(cuenta -> email.equals(cuenta.getEmail()));
+    }
+
+    @Override
     public Cuenta findByUsername(String username) {
         Cuenta accountFound = cuentasCache.get(username.toLowerCase());
 

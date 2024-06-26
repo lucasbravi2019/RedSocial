@@ -187,6 +187,8 @@ public class SeedServiceImpl implements SeedService {
                 .email("empresa1@mail.com")
                 .username("empresa1")
                 .fechaNacimiento(LocalDate.of(2001, 1, 3))
+                .direccion("Dirección 1")
+                .telefono("+54 261 999 9999")
                 .build();
 
         Cuenta empresa2 = CuentaEmpresa.builder()
@@ -194,6 +196,8 @@ public class SeedServiceImpl implements SeedService {
                 .email("empresa2@mail.com")
                 .username("empresa2")
                 .fechaNacimiento(LocalDate.of(2001, 1, 3))
+                .direccion("Dirección 2")
+                .telefono("+54 261 999 8888")
                 .build();
 
         return ListUtils.toArrayList(user1, user2, user3, user4, user5, pop1, pop2, pop3, empresa1, empresa2);

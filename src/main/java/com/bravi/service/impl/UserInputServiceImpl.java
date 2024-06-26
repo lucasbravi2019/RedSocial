@@ -1,6 +1,7 @@
 package com.bravi.service.impl;
 
 import com.bravi.service.UserInputService;
+import com.bravi.util.Strings;
 
 import java.util.Scanner;
 
@@ -19,7 +20,13 @@ public class UserInputServiceImpl implements UserInputService {
     }
 
     private String getString() {
-        return scanner.nextLine();
+        String str = scanner.nextLine();
+        if (Strings.EMPTY.equals(str)) {
+            System.out.println("No se ingresó el dato, por favor ingrese un valor no vacío");
+            return getString();
+        }
+
+        return str;
     }
 
     private Integer getInteger() {

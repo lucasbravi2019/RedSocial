@@ -23,6 +23,11 @@ public class CuentaNormal extends Cuenta {
     }
 
     @Override
+    public boolean canFollow() {
+        return true;
+    }
+
+    @Override
     public CuentaTypeEnum getCuentaType() {
         return CuentaTypeEnum.NORMAL;
     }
