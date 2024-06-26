@@ -19,7 +19,9 @@ public class MenuServiceImpl implements MenuService {
     public void mostrarMenu() {
         System.out.println("1) Listar todas las cuentas de la red");
         System.out.println("2) Seleccionar una cuenta");
-        System.out.println("3) Salir");
+        System.out.println("3) Agregar una cuenta");
+        System.out.println("4) Borrar una cuenta");
+        System.out.println("5) Salir");
     }
 
     @Override
@@ -30,14 +32,17 @@ public class MenuServiceImpl implements MenuService {
         System.out.println("4) Ver información de la cuenta");
         System.out.println("5) Ver alcance de la cuenta");
         System.out.println("6) Activar/Suspender la cuenta");
-        System.out.println("7) Salir");
+        System.out.println("7) Seguir usuario");
+        System.out.println("8) Dejar de seguir a usuario");
+        System.out.println("9) Salir");
     }
 
     @Override
     public void mostrarMenuFeed() {
         System.out.println("1) Dar like en publicación");
         System.out.println("2) Republicar una publicación");
-        System.out.println("3) Salir");
+        System.out.println("3) Borrar una publicación");
+        System.out.println("4) Salir");
     }
 
     @Override
@@ -66,5 +71,45 @@ public class MenuServiceImpl implements MenuService {
 
             System.out.println(sb);
         });
+    }
+
+    @Override
+    public void mostrarMenuSeguirUsuario() {
+        System.out.println("Por favor ingrese el nombre de usuario de la cuenta que desea seguir");
+    }
+
+    @Override
+    public void mostrarMenuDejarDeSeguirUsuario() {
+        System.out.println("Por favor ingrese el nombre de usuario de la cuenta que desea dejar de seguir");
+    }
+
+    @Override
+    public void pedirNombre() {
+        System.out.println("Por favor ingrese su nombre");
+    }
+
+    @Override
+    public void pedirEmail() {
+        System.out.println("Por favor ingrese su email");
+    }
+
+    @Override
+    public void pedirFechaNacimiento() {
+        System.out.println("Por favor ingrese su fecha de nacimiento en formato yyyy-MM-dd (2004-06-15)");
+    }
+
+    @Override
+    public void mostrarMenuBorrarCuenta() {
+        System.out.println("Ingrese el nombre de usuario de la cuenta a borrar");
+    }
+
+    @Override
+    public void pedirTipoCuenta() {
+        System.out.println("Por favor ingrese la letra del tipo de cuenta desea crear [E] = Empresa, [P] = Popular, [N] = Normal");
+    }
+
+    @Override
+    public void mostrarMenuBorrarPublicacion() {
+        System.out.println("Por favor ingrese el id de publicación que desea eliminar");
     }
 }

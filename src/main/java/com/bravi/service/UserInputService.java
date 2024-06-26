@@ -2,13 +2,8 @@ package com.bravi.service;
 
 public interface UserInputService {
 
-    Integer obtenerOperacion();
+    Integer obtenerEntero();
 
-    String obtenerUsername();
+    String obtenerDato();
 
-    String obtenerContenidoPublicacion();
-
-    String obtenerTipoPublicacion();
-
-    Integer obtenerIdPublicacion();
 }

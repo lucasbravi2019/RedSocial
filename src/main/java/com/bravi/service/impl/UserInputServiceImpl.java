@@ -9,28 +9,13 @@ public class UserInputServiceImpl implements UserInputService {
     private final Scanner scanner = new Scanner(System.in);
 
     @Override
-    public Integer obtenerOperacion() throws NumberFormatException {
+    public Integer obtenerEntero() throws NumberFormatException {
         return getInteger();
     }
 
     @Override
-    public String obtenerUsername() {
+    public String obtenerDato() {
         return getString();
-    }
-
-    @Override
-    public String obtenerContenidoPublicacion() {
-        return getString();
-    }
-
-    @Override
-    public String obtenerTipoPublicacion() {
-        return getString();
-    }
-
-    @Override
-    public Integer obtenerIdPublicacion() {
-        return getInteger();
     }
 
     private String getString() {

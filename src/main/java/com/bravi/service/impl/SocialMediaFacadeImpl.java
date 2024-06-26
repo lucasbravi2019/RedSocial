@@ -6,6 +6,7 @@ import com.bravi.service.CuentaService;
 import com.bravi.service.SocialMediaFacade;
 import com.bravi.user.LoggedUser;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -23,23 +24,24 @@ public class SocialMediaFacadeImpl implements SocialMediaFacade {
     }
 
     @Override
-    public void listarCuentas() {
-        cuentaService.verCuentas();
+    public boolean listarCuentas() {
+        return cuentaService.verCuentas();
     }
 
     @Override
-    public void verFeed() {
+    public boolean verFeed() {
         Cuenta userLogged = LoggedUser.getUserLogged();
         Feed feed = userLogged.getFeed();
 
         if (feed.getPublicaciones().isEmpty()) {
             System.out.println("No hay publicaciones");
-            return;
+            return false;
         }
 
         for (Publicacion<?> publicacion : feed.getPublicaciones()) {
             mostrarPublicacion(publicacion);
         }
+        return true;
     }
 
     private void mostrarPublicacion(Publicacion<?> publicacion) {
@@ -133,5 +135,65 @@ public class SocialMediaFacadeImpl implements SocialMediaFacade {
     @Override
     public Map<Integer, Publicacion<?>> obtenerPublicacionesSegunTipo(PublicacionTypeEnum publicacionType) {
         return cuentaService.obtenerPublicacionesSegunTipo(publicacionType);
+    }
+
+    @Override
+    public boolean listarCuentasParaSeguir() {
+        return cuentaService.verOtrasCuentas();
+    }
+
+    @Override
+    public void seguirUsuario(String username) {
+        cuentaService.seguirUsuario(username);
+    }
+
+    @Override
+    public void dejarDeSeguir(String username) {
+        cuentaService.dejarDeSeguir(username);
+    }
+
+    @Override
+    public void crearNuevoUsuario(String nombre, String email, LocalDate fechaNacimiento, Character tipoCuenta) {
+        cuentaService.crearCuenta(nombre, email, fechaNacimiento, tipoCuenta);
+    }
+
+    @Override
+    public void borrarUsuario(String username) {
+        cuentaService.borrarCuenta(username);
+    }
+
+    @Override
+    public boolean verPublicacionesParaBorrar() {
+        Cuenta userLogged = LoggedUser.getUserLogged();
+        Feed feed = userLogged.getFeed();
+
+        List<Publicacion<?>> publicaciones = feed.getPublicaciones().stream()
+                .filter(publicacion -> publicacion.getAutor().equals(userLogged))
+                .toList();
+
+        if (publicaciones.isEmpty()) {
+            System.out.println("No hay publicaciones");
+            return false;
+        }
+
+        for (Publicacion<?> publicacion : publicaciones) {
+            System.out.printf("%d - \"%s\"\n", publicacion.getId(), new String(publicacion.getContenido().getContenidoPublicado()));
+        }
+        return true;
+    }
+
+    @Override
+    public void listarSeguidores() {
+        Cuenta userLogged = LoggedUser.getUserLogged();
+        List<Cuenta> seguidores = userLogged.getSeguidores().getSeguidores();
+        for (Cuenta seguidor : seguidores) {
+            System.out.println(seguidor.getUsername());
+        }
+    }
+
+    @Override
+    public void borrarPublicacion(Integer publicacionId) {
+        Cuenta userLogged = LoggedUser.getUserLogged();
+        userLogged.getFeed().getPublicaciones().removeIf(publicacion -> publicacion.getId() == publicacionId);
     }
 }

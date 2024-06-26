@@ -17,6 +17,7 @@ public class AppContext {
     private EjecucionService ejecucionService;
     private SeedService seedService;
     private PublicacionRepository publicacionRepository;
+    private CuentaFactory cuentaFactory;
 
     public CuentaRepository getCuentaRepository() {
         if (cuentaRepository == null)
@@ -27,7 +28,7 @@ public class AppContext {
 
     public CuentaService getCuentaService() {
         if (cuentaService == null)
-            cuentaService = new CuentaServiceImpl(getCuentaRepository(), getPublicacionRepository());
+            cuentaService = new CuentaServiceImpl(getCuentaRepository(), getPublicacionRepository(), getCuentaFactory());
 
         return cuentaService;
     }
@@ -73,6 +74,13 @@ public class AppContext {
             publicacionRepository = new PublicacionRepositoryImpl();
 
         return publicacionRepository;
+    }
+
+    public CuentaFactory getCuentaFactory() {
+        if (cuentaFactory == null)
+            cuentaFactory = new CuentaFactoryImpl();
+
+        return cuentaFactory;
     }
 
 }

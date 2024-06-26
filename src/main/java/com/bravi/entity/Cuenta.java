@@ -26,8 +26,12 @@ public abstract class Cuenta extends Usuario {
                 .filter(publi -> publi.equals(publicacion)).findFirst()
                 .orElseThrow(() -> new PublicacionNotFoundException("Publicación no encontrada"));
 
-        if (!publicacion.isLikeable())
-            throw new LikeNotAvailableException("Dar like en la publicación no está permitido");
+        if (!publicacion.isLikeable()) {
+            String nombre = getNombre();
+            String contenido = new String(publicacion.getContenido().getContenidoPublicado());
+            throw new LikeNotAvailableException(String.format("%s intentó likear una publicación no likeable: \"%s\"",
+                    nombre, contenido));
+        }
 
         publicacionToLike.likearPublicacion(this);
     }
@@ -68,11 +72,12 @@ public abstract class Cuenta extends Usuario {
     }
 
     public void addSeguidor(Cuenta cuenta) {
-        seguidores.follow(cuenta);
+        seguidores.follow(feed.getPublicaciones(), cuenta);
+        System.out.printf("Se añadió como seguidor de la cuenta %s a %s\n", this.getUsername(), cuenta.getUsername());
     }
 
     public void removeSeguidor(Cuenta cuenta) {
-        seguidores.unfollow(cuenta);
+        seguidores.unfollow(feed.getPublicaciones(), cuenta);
     }
 
     public void alternarEstadoCuenta() {

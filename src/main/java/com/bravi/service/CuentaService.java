@@ -5,6 +5,7 @@ import com.bravi.entity.Contenido;
 import com.bravi.entity.Cuenta;
 import com.bravi.entity.Publicacion;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +29,7 @@ public interface CuentaService {
 
     void mostrarAlcance();
 
-    void verCuentas();
+    boolean verCuentas();
 
     void mostrarInformacionCuenta();
 
@@ -36,4 +37,15 @@ public interface CuentaService {
 
     Map<Integer, Publicacion<?>> obtenerPublicacionesSegunTipo(PublicacionTypeEnum publicacionType);
 
+    boolean verOtrasCuentas();
+
+    void seguirUsuario(String username);
+
+    List<Cuenta> getSeguidores(Cuenta cuenta);
+
+    void dejarDeSeguir(String username);
+
+    void crearCuenta(String nombre, String email, LocalDate fechaNacimiento, Character tipoCuenta);
+
+    void borrarCuenta(String username);
 }

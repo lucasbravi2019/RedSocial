@@ -1,13 +1,20 @@
 package com.bravi.service.impl;
 
+import com.bravi.constant.CuentaTypeEnum;
 import com.bravi.constant.PublicacionTypeEnum;
+import com.bravi.entity.Cuenta;
 import com.bravi.entity.Publicacion;
 import com.bravi.exception.AccountNotFoundException;
 import com.bravi.exception.LikeNotAvailableException;
 import com.bravi.exception.PublicacionNotFoundException;
 import com.bravi.exception.RepostNotAvailableException;
 import com.bravi.service.*;
+import com.bravi.util.Strings;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
 
 public class EjecucionServiceImpl implements EjecucionService {
@@ -46,14 +53,14 @@ public class EjecucionServiceImpl implements EjecucionService {
     @Override
     public void ejecutarPublicacionUsuario() {
         menuService.mostrarMenuPublicacion();
-        String contenidoPublicacion = userInputService.obtenerContenidoPublicacion();
+        String contenidoPublicacion = userInputService.obtenerDato();
         PublicacionTypeEnum publicacionTypeEnum = obtenerTipoPublicacion();
 
         socialMediaFacade.publicar(contenidoPublicacion, publicacionTypeEnum);
     }
 
     private PublicacionTypeEnum obtenerTipoPublicacion() {
-        String tipoPublicacion = userInputService.obtenerTipoPublicacion();
+        String tipoPublicacion = userInputService.obtenerDato();
 
         if (PublicacionTypeEnum.AMBAS.getUserInputOperation().equalsIgnoreCase(tipoPublicacion)) {
             return PublicacionTypeEnum.AMBAS;
@@ -84,19 +91,24 @@ public class EjecucionServiceImpl implements EjecucionService {
 
     private void logUser() {
         menuService.mostrarMenuLogin();
-        String username = userInputService.obtenerUsername();
+        String username = userInputService.obtenerDato();
 
         socialMediaFacade.logUser(username);
     }
 
+
     private void ejecutarOperacionesSubmenu() {
-        Integer operacion = userInputService.obtenerOperacion();
+        Integer operacion = userInputService.obtenerEntero();
 
         switch (operacion) {
             case 1:
-                socialMediaFacade.verFeed();
-                ejecutarMenuFeed();
-                ejecutarSubmenu();
+                boolean hayPublicaciones = socialMediaFacade.verFeed();
+                if (!hayPublicaciones)
+                    ejecutarSubmenu();
+                else {
+                    ejecutarMenuFeed();
+                    ejecutarSubmenu();
+                }
                 break;
 
             case 2:
@@ -125,12 +137,41 @@ public class EjecucionServiceImpl implements EjecucionService {
                 break;
 
             case 7:
+                ejecutarSeguirUsuario();
+                ejecutarSubmenu();
+                break;
+
+            case 8:
+                ejecutarDejarSeguirUsuario();
+                ejecutarSubmenu();
+                break;
+
+            case 9:
                 break;
 
             default:
                 System.out.println("Seleccionó una opción incorrecta, por favor vuelva a intentarlo");
                 ejecutarOperacionesSubmenu();
         }
+    }
+
+    private void ejecutarDejarSeguirUsuario() {
+        menuService.mostrarMenuDejarDeSeguirUsuario();
+        socialMediaFacade.listarSeguidores();
+        String username = userInputService.obtenerDato();
+        socialMediaFacade.dejarDeSeguir(username);
+    }
+
+    private void ejecutarSeguirUsuario() {
+        boolean hayCuentas = socialMediaFacade.listarCuentasParaSeguir();
+        if (!hayCuentas) {
+            System.out.println("No hay cuentas para seguir");
+            return;
+        }
+
+        menuService.mostrarMenuSeguirUsuario();
+        String username = userInputService.obtenerDato();
+        socialMediaFacade.seguirUsuario(username);
     }
 
     private void ejecutarMenuFeed() {
@@ -153,7 +194,7 @@ public class EjecucionServiceImpl implements EjecucionService {
                 .obtenerPublicacionesSegunTipo(publicacionType);
 
         menuService.mostrarPublicaciones(publicacionesPorId.values());
-        Integer publicacionId = userInputService.obtenerIdPublicacion();
+        Integer publicacionId = userInputService.obtenerEntero();
 
         Publicacion<?> publicacion = publicacionesPorId.get(publicacionId);
         if (publicacion == null)
@@ -172,7 +213,7 @@ public class EjecucionServiceImpl implements EjecucionService {
     }
 
     private void ejecutarOperacionesMenuFeed() {
-        Integer operacion = userInputService.obtenerOperacion();
+        Integer operacion = userInputService.obtenerEntero();
 
         switch (operacion) {
             case 1:
@@ -184,6 +225,10 @@ public class EjecucionServiceImpl implements EjecucionService {
                 break;
 
             case 3:
+                borrarPublicacion();
+                break;
+
+            case 4:
                 break;
 
             default:
@@ -192,8 +237,69 @@ public class EjecucionServiceImpl implements EjecucionService {
         }
     }
 
+    private void borrarPublicacion() {
+        boolean hayPublicaciones = socialMediaFacade.verPublicacionesParaBorrar();
+        if (!hayPublicaciones)
+            return;
+
+        menuService.mostrarMenuBorrarPublicacion();
+        Integer publicacionId = userInputService.obtenerEntero();
+        socialMediaFacade.borrarPublicacion(publicacionId);
+    }
+
+    private void borrarUsuario() {
+        boolean hayCuentas = socialMediaFacade.listarCuentas();
+        if (!hayCuentas)
+            return;
+
+        menuService.mostrarMenuBorrarCuenta();
+        String username = userInputService.obtenerDato();
+        socialMediaFacade.borrarUsuario(username);
+    }
+
+    private void crearNuevoUsuario() {
+        menuService.pedirNombre();
+        String nombre = userInputService.obtenerDato();
+        String email = pedirEmail();
+        LocalDate fechaNacimiento = pedirFechaNacimiento();
+        Character tipoCuenta = pedirTipoCuenta();
+        socialMediaFacade.crearNuevoUsuario(nombre, email, fechaNacimiento, tipoCuenta);
+    }
+
+    private String pedirEmail() {
+        menuService.pedirEmail();
+        String email = userInputService.obtenerDato();
+        if (!email.contains("@")) {
+            System.out.println("Ingresó un email inválido");
+            return pedirEmail();
+        }
+        return email;
+    }
+
+    private Character pedirTipoCuenta() {
+        menuService.pedirTipoCuenta();
+        String tipoCuenta = userInputService.obtenerDato();
+        List<Character> validTypes = CuentaTypeEnum.getValidTypes();
+        if (tipoCuenta == null || Strings.EMPTY.equals(tipoCuenta) || !validTypes.contains(tipoCuenta.toLowerCase().charAt(0))) {
+            System.out.println("Ingresó un tipo de cuenta inválido");
+            return pedirTipoCuenta();
+        }
+
+        return tipoCuenta.toLowerCase().charAt(0);
+    }
+
+    private LocalDate pedirFechaNacimiento() {
+        menuService.pedirFechaNacimiento();
+        try {
+            return LocalDate.parse(userInputService.obtenerDato());
+        } catch (DateTimeParseException ex) {
+            System.out.println("Ingresó una fecha inválida");
+            return pedirFechaNacimiento();
+        }
+    }
+
     private void ejecutarOperacionesMenuPrincipal() {
-        Integer operacion = userInputService.obtenerOperacion();
+        Integer operacion = userInputService.obtenerEntero();
 
         switch (operacion) {
             case 1:
@@ -208,6 +314,16 @@ public class EjecucionServiceImpl implements EjecucionService {
                 break;
 
             case 3:
+                crearNuevoUsuario();
+                ejecutarPrincipal();
+                break;
+
+            case 4:
+                borrarUsuario();
+                ejecutarPrincipal();
+                break;
+
+            case 5:
                 System.out.println("Finalizado");
                 break;
 
@@ -223,7 +339,7 @@ public class EjecucionServiceImpl implements EjecucionService {
     }
 
     private void ejecutarOperacionesInicio() {
-        Integer operacion = userInputService.obtenerOperacion();
+        Integer operacion = userInputService.obtenerEntero();
 
         switch (operacion) {
             case 1:

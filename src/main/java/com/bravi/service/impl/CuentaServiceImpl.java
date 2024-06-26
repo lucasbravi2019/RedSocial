@@ -1,16 +1,21 @@
 package com.bravi.service.impl;
 
+import com.bravi.constant.CuentaTypeEnum;
 import com.bravi.constant.PublicacionLengthEnum;
 import com.bravi.constant.PublicacionTypeEnum;
 import com.bravi.entity.Contenido;
 import com.bravi.entity.Cuenta;
 import com.bravi.entity.Publicacion;
+import com.bravi.exception.AccountNotFoundException;
+import com.bravi.exception.SeguidorInvalidException;
 import com.bravi.exception.UserAuthenticationException;
 import com.bravi.repository.CuentaRepository;
 import com.bravi.repository.PublicacionRepository;
+import com.bravi.service.CuentaFactory;
 import com.bravi.service.CuentaService;
 import com.bravi.user.LoggedUser;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -21,10 +26,13 @@ public class CuentaServiceImpl implements CuentaService {
 
     private final CuentaRepository cuentaRepository;
     private final PublicacionRepository publicacionRepository;
+    private final CuentaFactory cuentaFactory;
 
-    public CuentaServiceImpl(CuentaRepository cuentaRepository, PublicacionRepository publicacionRepository) {
+    public CuentaServiceImpl(CuentaRepository cuentaRepository, PublicacionRepository publicacionRepository,
+                             CuentaFactory cuentaFactory) {
         this.cuentaRepository = cuentaRepository;
         this.publicacionRepository = publicacionRepository;
+        this.cuentaFactory = cuentaFactory;
     }
 
     @Override
@@ -54,7 +62,6 @@ public class CuentaServiceImpl implements CuentaService {
         Cuenta seguidor = findCuenta(followerUsername);
 
         cuenta.addSeguidor(seguidor);
-        System.out.printf("Se añadió como seguidor de la cuenta %s a %s\n", accountUsername, followerUsername);
     }
 
     @Override
@@ -97,40 +104,27 @@ public class CuentaServiceImpl implements CuentaService {
     @Override
     public void mostrarAlcance() {
         Cuenta cuenta = LoggedUser.getUserLogged();
-        int alcance = 0;
-        Set<Cuenta> seguidores = new HashSet<>(List.of(cuenta));
-        boolean finished = false;
 
-        List<Cuenta> seguidoresNodo = cuenta.getSeguidores().getSeguidores();
-
-        while (!finished) {
-            List<Cuenta> seguidoresUnicos = seguidoresNodo.stream()
-                    .filter(follower -> !seguidores.contains(follower))
-                    .distinct()
-                    .toList();
-
-            if (seguidoresUnicos.isEmpty()) {
-                finished = true;
-            } else {
-                alcance += seguidoresUnicos.size();
-                seguidores.addAll(seguidoresUnicos);
-                seguidoresNodo = seguidoresNodo.stream().map(seguidor -> seguidor.getSeguidores().getSeguidores())
-                        .flatMap(Collection::stream)
-                        .collect(Collectors.toList());
-            }
-        }
-
+        List<Cuenta> seguidores = getSeguidores(cuenta);
+        int alcance = seguidores.size();
         String username = LoggedUser.getUserLogged().getUsername();
         System.out.printf("El alcance de la cuenta %s es de %d personas directas e indirectas\n", username, alcance);
     }
 
     @Override
-    public void verCuentas() {
+    public boolean verCuentas() {
         List<Cuenta> cuentas = cuentaRepository.findAll();
+
+        if (cuentas == null || cuentas.isEmpty()) {
+            System.out.println("No hay cuentas");
+            return false;
+        }
 
         for (Cuenta cuenta : cuentas) {
             System.out.println(cuenta.getUsername());
         }
+
+        return true;
     }
 
     @Override
@@ -168,6 +162,88 @@ public class CuentaServiceImpl implements CuentaService {
                 .collect(Collectors.groupingBy(Publicacion::getId,
                         Collectors.collectingAndThen(Collectors.mapping(Function.identity(),
                                 Collectors.toList()), a -> a.get(0))));
+    }
+
+    @Override
+    public boolean verOtrasCuentas() {
+        List<Cuenta> cuentas = cuentaRepository.findAll();
+        Cuenta userLogged = LoggedUser.getUserLogged();
+        cuentas.remove(userLogged);
+
+        if (cuentas.isEmpty())
+            return false;
+
+        for (Cuenta cuenta : cuentas) {
+            System.out.println(cuenta.getUsername());
+        }
+
+        return true;
+    }
+
+    @Override
+    public void seguirUsuario(String username) {
+        Cuenta userLogged = LoggedUser.getUserLogged();
+        try {
+            Cuenta cuentaASeguir = findCuenta(username);
+            cuentaASeguir.addSeguidor(userLogged);
+        } catch (AccountNotFoundException ex) {
+            System.out.printf("Cuenta no encontrada para username: %s\n", username);
+        } catch (SeguidorInvalidException ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+
+    @Override
+    public List<Cuenta> getSeguidores(Cuenta cuenta) {
+        Set<Cuenta> seguidores = new HashSet<>(List.of(cuenta));
+        boolean finished = false;
+
+        List<Cuenta> seguidoresNodo = cuenta.getSeguidores().getSeguidores();
+
+        while (!finished) {
+            List<Cuenta> seguidoresUnicos = seguidoresNodo.stream()
+                    .filter(follower -> !seguidores.contains(follower))
+                    .distinct()
+                    .toList();
+
+            if (seguidoresUnicos.isEmpty()) {
+                finished = true;
+            } else {
+                seguidores.addAll(seguidoresUnicos);
+                seguidoresNodo = seguidoresNodo.stream().map(seguidor -> seguidor.getSeguidores().getSeguidores())
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toList());
+            }
+        }
+
+        return new ArrayList<>(seguidores);
+    }
+
+    @Override
+    public void dejarDeSeguir(String username) {
+        Cuenta userLogged = LoggedUser.getUserLogged();
+        Cuenta cuenta = findCuenta(username);
+        cuenta.removeSeguidor(userLogged);
+    }
+
+    @Override
+    public void crearCuenta(String nombre, String email, LocalDate fechaNacimiento, Character tipoCuenta) {
+        CuentaTypeEnum tipoCuentaACrear;
+        try {
+            tipoCuentaACrear = CuentaTypeEnum.getTipoCuentaPorCaracter(tipoCuenta);
+        } catch (IllegalStateException ex) {
+            System.out.println(ex.getMessage());
+            return;
+        }
+
+        Cuenta cuenta = cuentaFactory.crearCuenta(nombre, email, fechaNacimiento, tipoCuentaACrear);
+        cuentaRepository.save(cuenta);
+    }
+
+    @Override
+    public void borrarCuenta(String username) {
+        Cuenta cuenta = findCuenta(username);
+        cuentaRepository.delete(cuenta);
     }
 
     private void mostrarPublicacion(Publicacion<?> publicacion) {

@@ -21,4 +21,19 @@ public interface MenuService {
 
     void mostrarPublicaciones(Collection<Publicacion<?>> publicaciones);
 
+    void mostrarMenuSeguirUsuario();
+
+    void mostrarMenuDejarDeSeguirUsuario();
+
+    void pedirNombre();
+
+    void pedirEmail();
+
+    void pedirFechaNacimiento();
+
+    void mostrarMenuBorrarCuenta();
+
+    void pedirTipoCuenta();
+
+    void mostrarMenuBorrarPublicacion();
 }
